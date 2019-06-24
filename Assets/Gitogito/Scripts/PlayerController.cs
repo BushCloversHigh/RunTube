@@ -3,7 +3,9 @@
 public class PlayerController : MonoBehaviour
 {
 
-    [SerializeField] private float rotateSpeed = 1f;
+    [SerializeField] private float rotateSpeed = 1f, gyroSensitibity = 100f;
+
+    [HideInInspector] public int control = 0;
 
     private void Update ()
     {
@@ -20,7 +22,11 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+#if UNITY_EDITOR
+            transform.Rotate (new Vector3 (0, 0, 50f * h * Time.deltaTime));
+#elif UNITY_ANDROID
             transform.Rotate (new Vector3 (0, 0, rotateSpeed * h * Time.deltaTime));
+#endif
         }
     }
 
@@ -29,7 +35,7 @@ public class PlayerController : MonoBehaviour
 
     private float HorizontalInput_Editor ()
     {
-        if (!Input.GetMouseButton(0))
+        if (!Input.GetMouseButton (0))
         {
             dirXP = 0;
             moveX = 0;
@@ -43,16 +49,26 @@ public class PlayerController : MonoBehaviour
 
     private float HorizontalInput_Android ()
     {
+        if (control == 0)
+        {
+            return TouchController ();
+        }
+        else
+        {
+            return GyroController ();
+        }
+    }
+
+    private float TouchController ()
+    {
         if (Input.touchCount == 0)
         {
             dirXP = 0;
             moveX = 0;
             return 0f;
         }
-
         Touch touch = Input.GetTouch (0);
         deltaX = touch.deltaPosition.x;
-
         return RotateDirection ();
     }
 
@@ -69,6 +85,16 @@ public class PlayerController : MonoBehaviour
             dirXP = dirX;
         }
         return moveX;
+    }
+
+    private float GyroController ()
+    {
+        float acceleration = Input.acceleration.x;
+        if (acceleration >= -0.05f && acceleration <= 0.05f)
+        {
+            acceleration = 0;
+        }
+        return acceleration * gyroSensitibity;
     }
 
     private int PlusMinus (float f)

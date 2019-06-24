@@ -3,9 +3,11 @@
 public class StageMover : MonoBehaviour
 {
 
-    public float moveSpeed = 1f;
+    [SerializeField] private float initialSpeed = 1f;
 
     private Transform tubeStage, player;
+
+    public static float playerPosZ = 0;
 
     private void Awake ()
     {
@@ -15,9 +17,16 @@ public class StageMover : MonoBehaviour
 
     private void FixedUpdate ()
     {
+        float moveSpeed = initialSpeed + Difficulty.speedDifficulty;
         Vector3 dir = Vector3.forward;
         float deltaTime = Time.fixedDeltaTime;
-        tubeStage.transform.position += Vector3.forward * moveSpeed * deltaTime;
         player.transform.position += Vector3.forward * moveSpeed * deltaTime;
+        playerPosZ = player.transform.position.z;
+        if (playerPosZ > tubeStage.transform.position.z + 15f)
+        {
+            tubeStage.transform.position = new Vector3 (0, 0, playerPosZ - 2f);
+        }
     }
+
 }
+    
