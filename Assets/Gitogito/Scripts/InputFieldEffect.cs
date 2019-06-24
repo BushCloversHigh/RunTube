@@ -13,6 +13,15 @@ public class InputFieldEffect : MonoBehaviour
         nameField = GetComponent<InputField> ();
     }
 
+    private void OnEnable ()
+    {
+        if (!string.IsNullOrEmpty (nameField.text))
+        {
+            RectTransform place = transform.Find ("Placeholder").GetComponent<RectTransform> ();
+            place.DOScale (Vector3.one * 0.5f, 0);
+        }
+    }
+
     private void Update ()
     {
         if (nameField.isFocused)

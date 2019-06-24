@@ -64,7 +64,7 @@ public class GameProcessor : MonoBehaviour
         RectTransform settingsRect = GameObject.Find ("Canvas").transform.Find ("Settings").GetComponent<RectTransform> ();
         settingsRect.gameObject.SetActive (true);
         settingsRect.DOMoveX (Screen.currentResolution.width - 270f, menuAnimSpeed).SetEase (Ease.OutExpo);
-        GetComponent<SettingManager> ().InitSetting ();
+        SendMessage ("InitSetting");
     }
 
     private void OnSettingBack ()
@@ -77,7 +77,7 @@ public class GameProcessor : MonoBehaviour
         RectTransform settingsRect = GameObject.Find ("Canvas").transform.Find ("Settings").GetComponent<RectTransform> ();
         settingsRect.DOMoveX (Screen.currentResolution.width + 500f, menuAnimSpeed).SetEase(Ease.OutExpo);
         ObjectActiveFalse (settingsRect.gameObject, menuAnimSpeed);
-        GetComponent<SettingManager> ().SaveSetting ();
+        SendMessage ("SaveSetting");
     }
 
     private void OnRankingPushed ()
@@ -90,6 +90,7 @@ public class GameProcessor : MonoBehaviour
         RectTransform rankingRect = GameObject.Find ("Canvas").transform.Find ("Ranking").GetComponent<RectTransform> ();
         rankingRect.gameObject.SetActive (true);
         rankingRect.DOMoveX (Screen.currentResolution.width - 270f, menuAnimSpeed).SetEase (Ease.OutExpo);
+        SendMessage ("OpenRanking");
     }
 
     private void OnRankingBack ()
@@ -102,6 +103,7 @@ public class GameProcessor : MonoBehaviour
         RectTransform rankingRect = GameObject.Find ("Canvas").transform.Find ("Ranking").GetComponent<RectTransform> ();
         rankingRect.DOMoveX (Screen.currentResolution.width + 500f, menuAnimSpeed).SetEase (Ease.OutExpo);
         ObjectActiveFalse (rankingRect.gameObject, menuAnimSpeed);
+        SendMessage ("CloseRanking");
     }
 
     private void OnInfoPushed ()

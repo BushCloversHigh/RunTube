@@ -26,4 +26,24 @@ public class DataBase : DataStrings
     {
         PlayerPrefs.SetInt (SCORE, score);
     }
+
+    public static string GetScoreID ()
+    {
+        return PlayerPrefs.GetString (OBJECTID, "");
+    }
+
+    public static void SetScoreID (string id)
+    {
+        PlayerPrefs.SetString (OBJECTID, id);
+    }
+
+    public static string GetUserName ()
+    {
+        return PlayerPrefs.GetString (USERNAME, "");
+    }
+
+    public static void SetUserName (string userName)
+    {
+        PlayerPrefs.SetString (USERNAME, userName);
+    }
 }
