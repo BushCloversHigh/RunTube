@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Difficulty : MonoBehaviour
+public class Difficulty : MonoBehaviour, IUpdate
 {
     public static float intervalDifficulty = 0f, probabiltyDifficulty = 0, speedDifficulty = 0;
 
@@ -20,6 +20,8 @@ public class Difficulty : MonoBehaviour
 
     private void Awake ()
     {
+        GitoBehaviour.AddUpdateList (this);
+
         intervalDifficulty = 0f;
         probabiltyDifficulty = 0f;
         speedDifficulty = 0f;
@@ -33,8 +35,10 @@ public class Difficulty : MonoBehaviour
     }
 
     private int i = 0, currentDifficulty = 0;
-    private void Update ()
+    public void UpdateMe ()
     {
+        if (GameProcessor.proggress != Proggress.PLAYING) return;
+
         timeCount += Time.deltaTime;
         if (timeCount < 10f)
         {
@@ -57,6 +61,7 @@ public class Difficulty : MonoBehaviour
                     if (currentDifficulty < 2)
                     {
                         currentDifficulty++;
+                        GameObject.FindWithTag ("Audio").GetComponent<AudioManager> ().ChangePitch (1f + currentDifficulty * 0.15f);
                     }
                 }
             }

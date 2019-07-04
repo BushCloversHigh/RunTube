@@ -11,6 +11,8 @@ public class Button : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPo
 
     [SerializeField] private string EventName;
 
+    [SerializeField] private SoundEffect soundEffect;
+
     private void Awake ()
     {
         highLight_img = GetComponentInChildren<Image> ();
@@ -36,6 +38,7 @@ public class Button : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPo
     public void OnPointerClick (PointerEventData eventData)
     {
         GameObject.FindWithTag ("GameSystem").SendMessage (EventName);
+        GameObject.FindWithTag ("Audio").GetComponent<AudioManager> ().SoundEffectPlay (soundEffect);
     }
 
 }

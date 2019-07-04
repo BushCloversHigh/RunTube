@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using DG.Tweening;
 
-public class InputFieldEffect : MonoBehaviour
+public class InputFieldEffect : MonoBehaviour, IUpdate
 {
     private InputField nameField;
 
@@ -10,6 +10,8 @@ public class InputFieldEffect : MonoBehaviour
 
     private void Awake ()
     {
+        GitoBehaviour.AddUpdateList (this);
+
         nameField = GetComponent<InputField> ();
     }
 
@@ -22,7 +24,7 @@ public class InputFieldEffect : MonoBehaviour
         }
     }
 
-    private void Update ()
+    public void UpdateMe ()
     {
         if (nameField.isFocused)
         {

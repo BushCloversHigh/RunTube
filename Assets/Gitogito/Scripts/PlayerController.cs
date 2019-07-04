@@ -1,14 +1,24 @@
 ﻿using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IUpdate
 {
 
     [SerializeField] private float rotateSpeed = 1f, gyroSensitibity = 100f;
 
     [HideInInspector] public int control = 0;
 
-    private void Update ()
+    int dirXP = 0;
+    float moveX = 0, deltaX;
+
+    private void Awake ()
     {
+        GitoBehaviour.AddUpdateList (this);
+    }
+
+    public void UpdateMe ()
+    {
+        if (GameProcessor.proggress == Proggress.GAMEOVER) return;
+
         float h;
 #if UNITY_EDITOR
         h = HorizontalInput_Editor ();
@@ -29,9 +39,6 @@ public class PlayerController : MonoBehaviour
 #endif
         }
     }
-
-    int dirXP = 0;
-    float moveX = 0, deltaX;
 
     private float HorizontalInput_Editor ()
     {

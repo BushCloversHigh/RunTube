@@ -4,24 +4,42 @@ using DG.Tweening;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class GameProcessor : MonoBehaviour
+public enum Proggress
 {
-    private int process = 0;
+    TITLE,
+    PLAYING,
+    GAMEOVER
+}
+
+public class GameProcessor : SystemUI
+{
+    public static Proggress proggress;
 
     private bool animing = false;
 
     private void Awake ()
     {
-        GetComponent<EnemySpawner> ().enabled = false;
-        GetComponent<Difficulty> ().enabled = false;
+        proggress = Proggress.TITLE;
     }
 
     private void Start ()
     {
-        GameObject canvas = GameObject.Find ("Canvas");
-        canvas.transform.Find ("Settings").gameObject.SetActive (false);
-        canvas.transform.Find ("Ranking").gameObject.SetActive (false);
-        canvas.transform.Find ("Info").gameObject.SetActive (false);
+        StartCoroutine (LateStart ());
+    }
+
+    private IEnumerator LateStart ()
+    {
+        yield return new WaitForEndOfFrame();
+        Transform ui = GameObject.Find ("UI/").transform.GetChild(0);
+        ui.Find ("Settings").gameObject.SetActive (false);
+        ui.Find ("Ranking").gameObject.SetActive (false);
+        ui.Find ("Info").gameObject.SetActive (false);
+        ui = GameObject.Find ("UI/").transform.GetChild (1);
+        ui.Find ("Settings").gameObject.SetActive (false);
+        ui.Find ("Ranking").gameObject.SetActive (false);
+        ui.Find ("Info").gameObject.SetActive (false);
+        GetComponent<GoogleAdMob> ().RequestBannerTop ();
+        yield break;
     }
 
     private void OnPlayStart ()
@@ -30,29 +48,27 @@ public class GameProcessor : MonoBehaviour
         {
             return;
         }
-        if (process == 0)
-        {
-            process = 1;
-            StartCoroutine (PlayStartCor ());
-        }
-    }
-
-    private IEnumerator PlayStartCor ()
-    {
-        GetComponent<EnemySpawner> ().enabled = true;
-        GetComponent<Difficulty> ().enabled = true;
-        GameObject title = GameObject.Find ("Canvas/TitlePanel");
-        GameObject ripple = GameObject.Find ("Canvas/TitlePanel/Ripple");
-        GameObject mask = GameObject.Find ("Canvas/TitlePanel/UnMask");
-        title.transform.DOScale (Vector3.one * 2.5f, 1.5f);
+        proggress = Proggress.PLAYING;
+        GetComponent<GoogleAdMob> ().DestroyBanner ();
+        GameObject title = GameObject.Find (ScreenRotateManager.UI_Path + "Title");
+        GameObject axis = title.transform.Find ("Axis").gameObject;
+        GameObject ripple = axis.transform.Find ("Ripple").gameObject;
+        GameObject mask = axis.transform.Find ("UnMask").gameObject;
+        axis.transform.DOScale (Vector3.one * 2.5f, 1.5f);
         ripple.transform.DOScale (Vector3.one * 15f, 1.0f);
         ripple.GetComponent<SVGImage> ().DOFade (0f, 1.0f);
         mask.transform.DOScale (Vector3.one * 15f, 1.0f);
-        yield return new WaitForSeconds (2f);
-        title.SetActive (false);
+        SetActiveDelay (title, false, 1.5f);
     }
 
     private float menuAnimSpeed = 0.5f;
+
+    private void ChangedOrientation ()
+    {
+        OnSettingBack ();
+        OnRankingBack ();
+        OnInfoBack ();
+    }
 
     private void OnSettingPushed ()
     {
@@ -61,10 +77,9 @@ public class GameProcessor : MonoBehaviour
             return;
         }
         Animing ();
-        RectTransform settingsRect = GameObject.Find ("Canvas").transform.Find ("Settings").GetComponent<RectTransform> ();
-        settingsRect.gameObject.SetActive (true);
-        settingsRect.DOMoveX (Screen.currentResolution.width - 270f, menuAnimSpeed).SetEase (Ease.OutExpo);
-        SendMessage ("InitSetting");
+        GameObject settings = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("Settings").gameObject;
+        MenuOpen (settings);
+        GetComponent<SettingManager> ().InitSetting ();
     }
 
     private void OnSettingBack ()
@@ -74,10 +89,9 @@ public class GameProcessor : MonoBehaviour
             return;
         }
         Animing ();
-        RectTransform settingsRect = GameObject.Find ("Canvas").transform.Find ("Settings").GetComponent<RectTransform> ();
-        settingsRect.DOMoveX (Screen.currentResolution.width + 500f, menuAnimSpeed).SetEase(Ease.OutExpo);
-        ObjectActiveFalse (settingsRect.gameObject, menuAnimSpeed);
-        SendMessage ("SaveSetting");
+        GameObject settings = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("Settings").gameObject;
+        MenuClose (settings);
+        GetComponent<SettingManager> ().SaveSetting ();
     }
 
     private void OnRankingPushed ()
@@ -87,10 +101,9 @@ public class GameProcessor : MonoBehaviour
             return;
         }
         Animing ();
-        RectTransform rankingRect = GameObject.Find ("Canvas").transform.Find ("Ranking").GetComponent<RectTransform> ();
-        rankingRect.gameObject.SetActive (true);
-        rankingRect.DOMoveX (Screen.currentResolution.width - 270f, menuAnimSpeed).SetEase (Ease.OutExpo);
-        SendMessage ("OpenRanking");
+        GameObject ranking = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("Ranking").gameObject;
+        MenuOpen (ranking);
+        GetComponent<RankingManager> ().OpenRanking ();
     }
 
     private void OnRankingBack ()
@@ -100,10 +113,9 @@ public class GameProcessor : MonoBehaviour
             return;
         }
         Animing ();
-        RectTransform rankingRect = GameObject.Find ("Canvas").transform.Find ("Ranking").GetComponent<RectTransform> ();
-        rankingRect.DOMoveX (Screen.currentResolution.width + 500f, menuAnimSpeed).SetEase (Ease.OutExpo);
-        ObjectActiveFalse (rankingRect.gameObject, menuAnimSpeed);
-        SendMessage ("CloseRanking");
+        GameObject ranking = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("Ranking").gameObject;
+        MenuClose (ranking);
+        GetComponent<RankingManager> ().CloseRanking ();
     }
 
     private void OnInfoPushed ()
@@ -113,9 +125,8 @@ public class GameProcessor : MonoBehaviour
             return;
         }
         Animing ();
-        RectTransform infoRect = GameObject.Find ("Canvas").transform.Find ("Info").GetComponent<RectTransform> ();
-        infoRect.gameObject.SetActive (true);
-        infoRect.DOMoveX (Screen.currentResolution.width - 270f, menuAnimSpeed).SetEase (Ease.OutExpo);
+        GameObject info = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("Info").gameObject;
+        MenuOpen (info);
     }
 
     private void OnInfoBack ()
@@ -125,79 +136,94 @@ public class GameProcessor : MonoBehaviour
             return;
         }
         Animing ();
-        RectTransform infoRect = GameObject.Find ("Canvas").transform.Find ("Info").GetComponent<RectTransform> ();
-        infoRect.DOMoveX (Screen.currentResolution.width + 500f, menuAnimSpeed).SetEase (Ease.OutExpo);
-        ObjectActiveFalse (infoRect.gameObject, menuAnimSpeed);
+        GameObject info = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("Info").gameObject;
+        MenuClose (info);
     }
 
+    private void MenuOpen(GameObject menu)
+    {
+        menu.SetActive (true);
+        RectTransform rect = menu.transform.GetChild (0).GetComponent<RectTransform> ();
+        switch (ScreenRotateManager.currentOrientation)
+        {
+        case Orientation.LANDSCAPE:
+            rect.DOMoveX (Screen.width - 320f, menuAnimSpeed).SetEase (Ease.OutExpo);
+            break;
+        case Orientation.PORTRAIT:
+            rect.DOMoveY (320f, menuAnimSpeed).SetEase (Ease.OutExpo);
+            break;
+        }
+    }
+
+    private void MenuClose (GameObject menu)
+    {
+        RectTransform rect = menu.transform.GetChild (0).GetComponent<RectTransform> ();
+        switch (ScreenRotateManager.currentOrientation)
+        {
+        case Orientation.LANDSCAPE:
+            rect.DOMoveX (Screen.width + 500f, menuAnimSpeed).SetEase (Ease.OutExpo);
+            break;
+        case Orientation.PORTRAIT:
+            rect.DOMoveY (-600f, menuAnimSpeed).SetEase (Ease.OutExpo);
+            break;
+        }
+        SetActiveDelay (menu, false, menuAnimSpeed);
+    }
 
     private void OnHited ()
     {
-        if(process == 2)
+        if(proggress == Proggress.GAMEOVER)
         {
             return;
         }
-        process = 2;
-
-        StartCoroutine (GameOverCor ());
+        proggress = Proggress.GAMEOVER;
+        GameObject.FindWithTag ("Audio").GetComponent<AudioManager> ().BGMStop ();
+        StartCoroutine (ScreenFlashAndGameOver ());
     }
 
-    private IEnumerator GameOverCor ()
-    {
-        GetComponent<StageMover> ().enabled = false;
-        GetComponent<EnemySpawner> ().enabled = false;
-        GetComponent<Difficulty> ().enabled = false;
-        ScreenFlash ();
-        yield return new WaitForSeconds (1.5f);
-        RectTransform gameOver = GameObject.Find ("Canvas").transform.Find("GameOver").GetComponent<RectTransform> ();
-        Text scoreText = gameOver.transform.Find ("ScoreBoard/Score").GetComponent<Text> ();
-        int thisScore = ScoreCounter.score;
-        scoreText.text = "Score : " + thisScore + " Pt";
-        gameOver.gameObject.SetActive (true);
-        gameOver.DOSizeDelta (Vector2.one * Screen.width, 1f);
-
-        if(thisScore > DataBase.GetBestScore ())
-        {
-            DataBase.SetBestScore (thisScore);
-            DataBase.ApplyData ();
-        }
-    }
-
-    private void ScreenFlash ()
+    private IEnumerator ScreenFlashAndGameOver ()
     {
         GameObject.FindWithTag ("Player").GetComponent<PlayerController> ().enabled = false;
-        SVGImage flash = GameObject.Find ("Canvas").transform.Find ("Flash").GetComponent<SVGImage> ();
+        GameObject flash = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("Flash").gameObject;
         flash.gameObject.SetActive (true);
+        SVGImage flash_img = flash.transform.Find ("Img").GetComponent<SVGImage>();
         Camera.main.DOShakePosition (1.0f, 3f, 20, 180, true);
         Sequence sequence = DOTween.Sequence ()
             .OnStart (() =>
             {
-                flash.DOFade (1f, 0.5f);
+                flash_img.DOFade (1f, 0.5f);
             })
             .AppendInterval (0.5f)
-            .Append (flash.DOFade (0f, 0.5f))
+            .Append (flash_img.DOFade (0f, 0.5f))
             .AppendInterval (0.5f).
             OnKill (() =>
             {
                 flash.gameObject.SetActive (false);
             });
         sequence.Play ();
+        yield return new WaitForSeconds (1.5f);
+        GameObject gameOver = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("GameOver").gameObject;
+        RectTransform gameOverRect = gameOver.transform.GetChild (0).GetComponent<RectTransform> ();
+        Text scoreText = gameOverRect.transform.Find ("ScoreBoard/Score").GetComponent<Text> ();
+        int thisScore = ScoreCounter.score;
+        scoreText.text = "Score : " + thisScore + " Pt";
+        gameOver.SetActive (true);
+        gameOverRect.DOSizeDelta (Vector2.one * Screen.width, 0.7f);
+
+        GetComponent<GoogleAdMob> ().RequestBannerTop ();
+        GetComponent<GoogleAdMob> ().RequestBannerBottom ();
+
+        if (thisScore > DataBase.GetBestScore ())
+        {
+            DataBase.SetBestScore (thisScore);
+            DataBase.ApplyData ();
+        }
     }
 
     private void OnRestart ()
     {
+        GetComponent<GoogleAdMob> ().DestroyBanner ();
         SceneManager.LoadScene (0);
-    }
-
-    private void ObjectActiveFalse (GameObject obj, float time)
-    {
-        StartCoroutine (ObjectActiveFalseCor (obj, time));
-    }
-
-    private IEnumerator ObjectActiveFalseCor (GameObject obj, float time)
-    {
-        yield return new WaitForSeconds (time);
-        obj.SetActive (false);
     }
 
     private IEnumerator Animing ()

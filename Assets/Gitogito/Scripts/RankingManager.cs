@@ -3,41 +3,37 @@ using UnityEngine.UI;
 using NCMB;
 using System.Collections.Generic;
 
-public class RankingManager : Toast
+public class RankingManager : SystemUI
 {
-
-    private GameObject rankerBoard, rankerElement;
-
-    private InputField nameField;
-
     private bool top10 = true;
+
+    [SerializeField] private GameObject rankerElement;
+
+    private void Awake ()
+    {
+        NCMBSettings.ApplicationKey = DataStrings.NCMBAPPKEY;
+        NCMBSettings.ClientKey = DataStrings.NCMBCLIANTKEY;
+    }
 
     private void Start ()
     {
-        Debug.Log (DataBase.GetUserName ());
-
         NCMBSettings.ApplicationKey = DataStrings.NCMBAPPKEY;
         NCMBSettings.ClientKey = DataStrings.NCMBCLIANTKEY;
-
-        int bestScore = DataBase.GetBestScore ();
-        string scoreStr = bestScore == 0 ? "------" : bestScore.ToString ();
-        GameObject.Find ("Canvas").transform.Find("Ranking/Your").GetComponent<Text> ().text = "あなたのベストスコア : " + scoreStr + " pt";
-
-        rankerBoard = GameObject.Find ("Canvas/Ranking/LeaderBoard/Viewport/Content");
-        rankerElement = rankerBoard.transform.Find ("Element").gameObject;
-        rankerElement.SetActive (false);
-
-        nameField = GameObject.Find ("Canvas/Ranking/NameField").GetComponent<InputField> ();
-        nameField.text = DataBase.GetUserName ();
-
     }
 
-    private void OpenRanking ()
+    public void OpenRanking ()
     {
+        int bestScore = DataBase.GetBestScore ();
+        string scoreStr = bestScore == 0 ? "------" : bestScore.ToString ();
+        Transform ranking = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("Ranking");
+        ranking.Find ("Menu/Your").GetComponent<Text> ().text = "あなたのベストスコア : " + scoreStr + " pt";
+        
+        InputField nameField = ranking.Find ("Menu/NameField").GetComponent<InputField> ();
+        nameField.text = DataBase.GetUserName ();
         GetRanking_Top ();
     }
 
-    private void CloseRanking ()
+    public void CloseRanking ()
     {
         DataBase.ApplyData ();
     }
@@ -59,14 +55,14 @@ public class RankingManager : Toast
         int bestScore = DataBase.GetBestScore ();
         if(bestScore == 0)
         {
-            Show ("まだスコアがありません");
+            ShowToast ("まだスコアがありません");
             return;
         }
 
-        string upName = nameField.text;
+        string upName = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("Ranking/Menu/NameField").GetComponent<InputField> ().text;
         if (string.IsNullOrEmpty (upName))
         {
-            Show ("名前を入力してください");
+            ShowToast ("名前を入力してください");
             return;
         }
 
@@ -84,6 +80,7 @@ public class RankingManager : Toast
 
     private void NewUserUpload (string upName, int bestScore)
     {
+        Loading (true);
         NCMBObject obj = new NCMBObject ("ScoreRanking");
         obj["Name"] = upName;
         obj["Score"] = bestScore;
@@ -96,57 +93,60 @@ public class RankingManager : Toast
             }
             else
             {
-                Show ("エラーが発生してしまいました。");
+                ShowToast ("エラーが発生してしまいました。");
             }
+            Loading (false);
         });
     }
 
     private void ScoreUpdate (string id, string upName, int bestScore)
     {
+        Loading (true);
         NCMBQuery<NCMBObject> query = new NCMBQuery<NCMBObject> ("ScoreRanking");
         query.WhereEqualTo ("objectId", id);
         query.FindAsync ((List<NCMBObject> objList, NCMBException e) =>
         {
             if (e != null || objList.Count == 0)
             {
-                Show ("エラーが発生してしまいました。");
-                return;
+                ShowToast ("エラーが発生してしまいました。");
             }
-
-            int cloudScore = System.Convert.ToInt32 (objList[0]["Score"]);
-            if (bestScore >= cloudScore)
+            else
             {
-                objList[0]["Score"] = bestScore;
-                objList[0]["Name"] = upName;
-                objList[0].SaveAsync ((NCMBException ee) =>
+                int cloudScore = System.Convert.ToInt32 (objList[0]["Score"]);
+                if (bestScore >= cloudScore)
                 {
-                    if (ee != null)
+                    objList[0]["Score"] = bestScore;
+                    objList[0]["Name"] = upName;
+                    objList[0].SaveAsync ((NCMBException ee) =>
                     {
-                        Show ("エラーが発生してしまいました。");
-                        return;
-                    }
-
-                    if (top10)
-                    {
-                        GetRanking_Top ();
-                    }
-                    else
-                    {
-                        GetRanking_Rivals ();
-                    }
-
-
-                });
+                        if (ee != null)
+                        {
+                            ShowToast ("エラーが発生してしまいました。");
+                        }
+                        else
+                        {
+                            if (top10)
+                            {
+                                GetRanking_Top ();
+                            }
+                            else
+                            {
+                                GetRanking_Rivals ();
+                            }
+                        }
+                    });
+                }
             }
+            Loading (false);
         });
     }
 
     private void GetRanking_Top ()
     {
+        Loading (true);
         top10 = true;
-        GameObject.Find ("Canvas/Ranking/Change/Text").GetComponent<Text> ().text = "あなたの順位";
+        GameObject.Find (ScreenRotateManager.UI_Path).transform.Find("Ranking/Menu/Change/Text").GetComponent<Text> ().text = "ライバル";
         RankerReset ();
-
         NCMBQuery<NCMBObject> query = new NCMBQuery<NCMBObject> ("ScoreRanking");
         query.OrderByDescending ("Score");
         query.Limit = 30;
@@ -154,16 +154,18 @@ public class RankingManager : Toast
         {
             if (e != null)
             {
-                Show ("エラーが発生してしまいました。");
-                return;
+                ShowToast ("エラーが発生してしまいました。");
             }
-
-            int r = 1;
-            foreach (NCMBObject obj in objList)
+            else
             {
-                SetRankerElement (obj, r);
-                r++;
+                int r = 1;
+                foreach (NCMBObject obj in objList)
+                {
+                    SetRankerElement (obj, r);
+                    r++;
+                }
             }
+            Loading (false);
         });
     }
 
@@ -172,40 +174,45 @@ public class RankingManager : Toast
         string scoreID = DataBase.GetScoreID ();
         if (string.IsNullOrEmpty (scoreID))
         {
-            Show ("まだあなたのスコアが登録されていません。");
+            ShowToast ("まだあなたのスコアが登録されていません。");
             return;
         }
+        Loading (true);
         top10 = false;
-        GameObject.Find ("Canvas/Ranking/Change/Text").GetComponent<Text> ().text = "トップ";
+        GameObject.Find (ScreenRotateManager.UI_Path).transform.Find("Ranking/Menu/Change/Text").GetComponent<Text> ().text = "トップ";
         RankerReset ();
-
         NCMBQuery<NCMBObject> query = new NCMBQuery<NCMBObject> ("ScoreRanking");
         query.WhereEqualTo ("objectId", scoreID);
         query.FindAsync ((List<NCMBObject> objList, NCMBException e) =>
         {
             if (e != null || objList.Count == 0)
             {
-                Show ("エラーが発生してしまいました。");
-                return;
+                ShowToast ("エラーが発生してしまいました。");
             }
-
-            NCMBQuery<NCMBObject> rankQuery = new NCMBQuery<NCMBObject> ("ScoreRanking");
-            rankQuery.WhereGreaterThan ("Score", objList[0]["Score"]);
-            rankQuery.CountAsync ((int count, NCMBException ee) =>
+            else
             {
-                if (ee != null)
+                NCMBQuery<NCMBObject> rankQuery = new NCMBQuery<NCMBObject> ("ScoreRanking");
+                rankQuery.WhereGreaterThan ("Score", objList[0]["Score"]);
+                rankQuery.CountAsync ((int count, NCMBException ee) =>
                 {
-                    Show ("エラーが発生してしまいました。");
-                    return;
-                }
-                int rank = count + 1;
-                GetRanking_Rivals (rank);
-            });
+                    if (ee != null)
+                    {
+                        ShowToast ("エラーが発生してしまいました。");
+                    }
+                    else
+                    {
+                        int rank = count + 1;
+                        GetRanking_Rivals (rank);
+                    }
+                });
+            }
+            Loading (false);
         });
     }
 
     private void GetRanking_Rivals (int rank)
     {
+        Loading (true);
         int numSkip = rank - 5;
         if (numSkip < 0)
         {
@@ -219,16 +226,18 @@ public class RankingManager : Toast
         {
             if (e != null)
             {
-                Show ("エラーが発生してしまいました。");
-                return;
+                ShowToast ("エラーが発生してしまいました。");
             }
-
-            int r = numSkip + 1;
-            foreach (NCMBObject obj in objListy)
+            else
             {
-                SetRankerElement (obj, r);
-                r++;
+                int r = numSkip + 1;
+                foreach (NCMBObject obj in objListy)
+                {
+                    SetRankerElement (obj, r);
+                    r++;
+                }
             }
+            Loading (false);
         });
     }
 
@@ -237,7 +246,8 @@ public class RankingManager : Toast
         string id = obj.ObjectId;
         int s = System.Convert.ToInt32 (obj["Score"]);
         string n = System.Convert.ToString (obj["Name"]);
-        GameObject go_ranker = Instantiate (rankerElement, rankerBoard.transform);
+        Transform rankerBoard = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("Ranking/Menu/LeaderBoard/Viewport/Content");
+        GameObject go_ranker = Instantiate (rankerElement, rankerBoard);
         go_ranker.SetActive (true);
         go_ranker.transform.Find ("Num").GetComponent<Text> ().text = rank.ToString ();
         go_ranker.transform.Find ("Name").GetComponent<Text> ().text = n;
@@ -250,9 +260,10 @@ public class RankingManager : Toast
 
     private void RankerReset ()
     {
-        for(int i = 1 ; i < rankerBoard.transform.childCount ; i++)
+        Transform rankerBoard = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("Ranking/Menu/LeaderBoard/Viewport/Content");
+        for (int i = 0 ; i < rankerBoard.childCount ; i++)
         {
-            Destroy (rankerBoard.transform.GetChild (i).gameObject);
+            Destroy (rankerBoard.GetChild (i).gameObject);
         }
     }
 }

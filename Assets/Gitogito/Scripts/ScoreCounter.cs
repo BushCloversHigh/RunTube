@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-
-public class ScoreCounter : MonoBehaviour
+﻿
+public class ScoreCounter
 {
     public static int score ;
 

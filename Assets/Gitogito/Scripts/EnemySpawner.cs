@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class EnemySpawner : MonoBehaviour
+public class EnemySpawner : MonoBehaviour, IUpdate
 {
 
     [SerializeField] private GameObject enemyCube, enemyPyramid;
@@ -14,9 +14,16 @@ public class EnemySpawner : MonoBehaviour
 
     private int spawnPosBase = 0;
 
-    private void Update ()
+    private void Awake ()
     {
-        spawnPosBase = Mathf.CeilToInt (StageMover.playerPosZ) + 31;
+        GitoBehaviour.AddUpdateList (this);
+    }
+
+    public void UpdateMe ()
+    {
+        if (GameProcessor.proggress != Proggress.PLAYING) return;
+
+        spawnPosBase = Mathf.CeilToInt (StageMover.playerPosZ) + 38;
         ConstSpawn ();
         PatternSpawn ();
     }

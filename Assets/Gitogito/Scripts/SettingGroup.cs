@@ -1,46 +1,46 @@
 ﻿using UnityEngine;
-using UnityEngine.Events;
 
 public class SettingGroup : MonoBehaviour
 {
+    [SerializeField] private Setting setting;
+
     private SettingElement[] elements;
 
     [HideInInspector] public int number;
-    [HideInInspector] public int value;
     public int defaultValue;
-
-    [SerializeField] private string settingName;
-
+    
     private void Awake ()
     {
         elements = new SettingElement[transform.childCount];
-        for(int i = 0 ; i < transform.childCount ; i++)
+        for (int i = 0 ; i < transform.childCount ; i++)
         {
             elements[i] = transform.GetChild (i).GetComponent<SettingElement> ();
             elements[i].element = i;
         }
+        Selected (DataBase.GetSettingValue ((int)setting, defaultValue));
+      
     }
 
     public void Selected (int element)
     {
-        GameObject.FindWithTag ("GameSystem").SendMessage ("SettingExplain", number);
-        SelectSettingValue (element);
+        GameObject.FindWithTag ("GameSystem").GetComponent<SettingManager> ().SetSetting (setting, element);
+        ToggleFix (element);
     }
 
-    public void SelectSettingValue (int element)
+    public void ToggleFix (int element)
     {
-        SelectSetting (element);
-        GameObject.FindWithTag ("GameSystem").SendMessage (settingName, element);
-    }
-
-    public void SelectSetting (int element)
-    {
-        value = element;
         for (int i = 0 ; i < elements.Length ; i++)
         {
-            elements[i].ChangeHighLight (i == value);
+            elements[i].ChangeHighLight (i == element);
         }
     }
 
-
+    public void InitToggle ()
+    {
+        int element = DataBase.GetSettingValue ((int)setting, defaultValue);
+        for (int i = 0 ; i < elements.Length ; i++)
+        {
+            elements[i].ChangeHighLight (i == element);
+        }
+    }
 }
