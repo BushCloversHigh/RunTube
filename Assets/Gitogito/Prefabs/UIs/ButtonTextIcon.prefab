@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1152299999854302290}
   - component: {fileID: 7392070188171325768}
   m_Layer: 5
-  m_Name: Change
+  m_Name: ButtonTextIcon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -99,6 +99,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   highLight: 1
   EventName: OnChangeRanking
+  soundEffect: 0
 --- !u!1 &1152300000013605601
 GameObject:
   m_ObjectHideFlags: 0
@@ -251,6 +252,7 @@ GameObject:
   - component: {fileID: 6461588660500609235}
   - component: {fileID: 6461588660500609233}
   - component: {fileID: 6461588660500609232}
+  - component: {fileID: 8235909446582542552}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -319,3 +321,17 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 1
   m_Text: "\u3042\u306A\u305F\u306E\u9806\u4F4D"
+--- !u!114 &8235909446582542552
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6461588660500609234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a100d166718e4022b352944f12f3b20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  jp: 
+  en: 

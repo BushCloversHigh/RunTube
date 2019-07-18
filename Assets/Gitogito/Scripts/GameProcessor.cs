@@ -20,6 +20,7 @@ public class GameProcessor : SystemUI
     private void Awake ()
     {
         proggress = Proggress.TITLE;
+        ScoreCounter.InitScore ();
     }
 
     private void Start ()
@@ -49,6 +50,7 @@ public class GameProcessor : SystemUI
             return;
         }
         proggress = Proggress.PLAYING;
+        SendMessage ("FixedRotate");
         GetComponent<GoogleAdMob> ().DestroyBanner ();
         GameObject title = GameObject.Find (ScreenRotateManager.UI_Path + "Title");
         GameObject axis = title.transform.Find ("Axis").gameObject;
@@ -63,11 +65,14 @@ public class GameProcessor : SystemUI
 
     private float menuAnimSpeed = 0.5f;
 
-    private void ChangedOrientation ()
+    private void OnPortraitPushed ()
     {
-        OnSettingBack ();
-        OnRankingBack ();
-        OnInfoBack ();
+        SendMessage ("ChangeOrientation", Orientation.PORTRAIT);
+    }
+
+    private void OnLandscapePushed ()
+    {
+        SendMessage ("ChangeOrientation", Orientation.LANDSCAPE);
     }
 
     private void OnSettingPushed ()

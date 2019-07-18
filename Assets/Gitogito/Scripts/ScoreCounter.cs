@@ -3,7 +3,7 @@ public class ScoreCounter
 {
     public static int score ;
 
-    private void Awake ()
+    public static void InitScore ()
     {
         score = 0;
     }

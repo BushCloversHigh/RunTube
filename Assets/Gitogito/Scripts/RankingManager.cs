@@ -26,10 +26,11 @@ public class RankingManager : SystemUI
         int bestScore = DataBase.GetBestScore ();
         string scoreStr = bestScore == 0 ? "------" : bestScore.ToString ();
         Transform ranking = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("Ranking");
-        ranking.Find ("Menu/Your").GetComponent<Text> ().text = "あなたのベストスコア : " + scoreStr + " pt";
+        ranking.Find ("Menu/Your").GetComponent<Text> ().text = Localize.GetLocalizeString("あなたのベストスコア : ", "Your best score : ") + scoreStr + " pt";
         
         InputField nameField = ranking.Find ("Menu/NameField").GetComponent<InputField> ();
         nameField.text = DataBase.GetUserName ();
+        nameField.gameObject.SendMessage ("Init");
         GetRanking_Top ();
     }
 
@@ -55,14 +56,14 @@ public class RankingManager : SystemUI
         int bestScore = DataBase.GetBestScore ();
         if(bestScore == 0)
         {
-            ShowToast ("まだスコアがありません");
+            ShowToast (Localize.GetLocalizeString("まだスコアがありません", "There is no score yet."));
             return;
         }
 
         string upName = GameObject.Find (ScreenRotateManager.UI_Path).transform.Find ("Ranking/Menu/NameField").GetComponent<InputField> ().text;
         if (string.IsNullOrEmpty (upName))
         {
-            ShowToast ("名前を入力してください");
+            ShowToast (Localize.GetLocalizeString ("名前を入力してください", "Please enter your name."));
             return;
         }
 
@@ -93,7 +94,7 @@ public class RankingManager : SystemUI
             }
             else
             {
-                ShowToast ("エラーが発生してしまいました。");
+                ShowError ();
             }
             Loading (false);
         });
@@ -108,7 +109,7 @@ public class RankingManager : SystemUI
         {
             if (e != null || objList.Count == 0)
             {
-                ShowToast ("エラーが発生してしまいました。");
+                ShowError ();
             }
             else
             {
@@ -121,7 +122,7 @@ public class RankingManager : SystemUI
                     {
                         if (ee != null)
                         {
-                            ShowToast ("エラーが発生してしまいました。");
+                            ShowError ();
                         }
                         else
                         {
@@ -145,7 +146,7 @@ public class RankingManager : SystemUI
     {
         Loading (true);
         top10 = true;
-        GameObject.Find (ScreenRotateManager.UI_Path).transform.Find("Ranking/Menu/Change/Text").GetComponent<Text> ().text = "ライバル";
+        GameObject.Find (ScreenRotateManager.UI_Path).transform.Find("Ranking/Menu/Change/Text").GetComponent<Text> ().text = Localize.GetLocalizeString("ライバル", "Rivals");
         RankerReset ();
         NCMBQuery<NCMBObject> query = new NCMBQuery<NCMBObject> ("ScoreRanking");
         query.OrderByDescending ("Score");
@@ -154,7 +155,7 @@ public class RankingManager : SystemUI
         {
             if (e != null)
             {
-                ShowToast ("エラーが発生してしまいました。");
+                ShowError ();
             }
             else
             {
@@ -174,12 +175,12 @@ public class RankingManager : SystemUI
         string scoreID = DataBase.GetScoreID ();
         if (string.IsNullOrEmpty (scoreID))
         {
-            ShowToast ("まだあなたのスコアが登録されていません。");
+            ShowToast (Localize.GetLocalizeString ("まだあなたのスコアが登録されていません。", "Your score has not been registered yet."));
             return;
         }
         Loading (true);
         top10 = false;
-        GameObject.Find (ScreenRotateManager.UI_Path).transform.Find("Ranking/Menu/Change/Text").GetComponent<Text> ().text = "トップ";
+        GameObject.Find (ScreenRotateManager.UI_Path).transform.Find("Ranking/Menu/Change/Text").GetComponent<Text> ().text = Localize.GetLocalizeString("トップ", "Top");
         RankerReset ();
         NCMBQuery<NCMBObject> query = new NCMBQuery<NCMBObject> ("ScoreRanking");
         query.WhereEqualTo ("objectId", scoreID);
@@ -187,7 +188,7 @@ public class RankingManager : SystemUI
         {
             if (e != null || objList.Count == 0)
             {
-                ShowToast ("エラーが発生してしまいました。");
+                ShowError ();
             }
             else
             {
@@ -197,7 +198,7 @@ public class RankingManager : SystemUI
                 {
                     if (ee != null)
                     {
-                        ShowToast ("エラーが発生してしまいました。");
+                        ShowError ();
                     }
                     else
                     {
@@ -226,7 +227,7 @@ public class RankingManager : SystemUI
         {
             if (e != null)
             {
-                ShowToast ("エラーが発生してしまいました。");
+                ShowError ();
             }
             else
             {
@@ -265,5 +266,10 @@ public class RankingManager : SystemUI
         {
             Destroy (rankerBoard.GetChild (i).gameObject);
         }
+    }
+
+    private void ShowError ()
+    {
+        ShowToast (Localize.GetLocalizeString ("エラーが発生してしまいました。", "An error has occurred."));
     }
 }

@@ -1,22 +1,7 @@
 fileFormatVersion: 2
-guid: 8faa662ccc222406eac7535e54a659ea
+guid: f6f69f89f798b440f9946b9e5e375b59
 ScriptedImporter:
-  internalIDToNameTable:
-  - first:
-      1: 100000
-    second: gameObject/InfoButton
-  - first:
-      4: 400000
-    second: gameObject/InfoButton/Transform
-  - first:
-      212: 21200000
-    second: gameObject/InfoButton/SpriteRenderer
-  - first:
-      213: 21300000
-    second: sprite
-  - first:
-      1001: 100100000
-    second: gameObject
+  internalIDToNameTable: []
   externalObjects: {}
   serializedVersion: 2
   userData: 
@@ -32,8 +17,8 @@ ScriptedImporter:
   generatePhysicsShape: 0
   preserveViewport: 0
   advancedMode: 1
-  predefinedResolutionIndex: 2
-  targetResolution: 720
+  predefinedResolutionIndex: 1
+  targetResolution: 1080
   resolutionMultiplier: 1
   stepDistance: 1
   samplingStepDistance: 100
@@ -62,6 +47,6 @@ ScriptedImporter:
         y: 0
         width: 0
         height: 0
-      spriteID: 1f68971d82fb640a88eec64b8927e9bc
+      spriteID: 0ed21b8f1593f46729d5a8b6f1cc2644
       internalID: 0
     PhysicsOutlines: []

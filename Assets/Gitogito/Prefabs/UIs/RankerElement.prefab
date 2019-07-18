@@ -260,7 +260,7 @@ GameObject:
   - component: {fileID: 7200839954547857473}
   - component: {fileID: 7200839954547857502}
   m_Layer: 5
-  m_Name: Element
+  m_Name: RankerElement
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

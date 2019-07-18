@@ -1,7 +1,22 @@
 fileFormatVersion: 2
 guid: 8bd9a349119ed4196a312110ef86d299
 ScriptedImporter:
-  internalIDToNameTable: []
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: gameObject/CloseButton
+  - first:
+      4: 400000
+    second: gameObject/CloseButton/Transform
+  - first:
+      212: 21200000
+    second: gameObject/CloseButton/SpriteRenderer
+  - first:
+      213: 21300000
+    second: sprite
+  - first:
+      1001: 100100000
+    second: gameObject
   externalObjects: {}
   serializedVersion: 2
   userData: 
@@ -16,11 +31,11 @@ ScriptedImporter:
   customPivot: {x: 0, y: 0}
   generatePhysicsShape: 0
   preserveViewport: 0
-  advancedMode: 0
+  advancedMode: 1
   predefinedResolutionIndex: 1
   targetResolution: 1080
   resolutionMultiplier: 1
-  stepDistance: 10
+  stepDistance: 1
   samplingStepDistance: 100
   maxCordDeviationEnabled: 0
   maxCordDeviation: 1

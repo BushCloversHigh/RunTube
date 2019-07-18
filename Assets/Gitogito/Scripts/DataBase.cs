@@ -12,6 +12,16 @@ public class DataBase : DataStrings
         PlayerPrefs.SetInt (SETTINGS[setting], value);
     }
 
+    public static Orientation GetSavedOrientation ()
+    {
+        return (Orientation) PlayerPrefs.GetInt (ORIETATION, (int) Orientation.PORTRAIT);
+    }
+
+    public static void SaveOrientation (Orientation value)
+    {
+        PlayerPrefs.SetInt (ORIETATION, (int)value);
+    }
+
     public static void ApplyData ()
     {
         PlayerPrefs.Save ();

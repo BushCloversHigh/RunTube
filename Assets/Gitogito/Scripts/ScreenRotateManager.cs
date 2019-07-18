@@ -8,114 +8,91 @@ public enum Orientation
 }
 
 [DefaultExecutionOrder (-1)]
-public class ScreenRotateManager : MonoBehaviour, IUpdate
+public class ScreenRotateManager : MonoBehaviour
 {
-    public static Orientation currentOrientation;
-    
-    public static string UI_Path;
+    public static Orientation currentOrientation = Orientation.PORTRAIT;
 
-    private int screenWidth = 720, screenHeight = 1280;
+    public static string UI_Path = "UI/Portrait/";
 
     private void Awake ()
     {
-        GitoBehaviour.AddUpdateList (this);
-        currentOrientation = GetOrientation ();
-        ChangeOrientation (currentOrientation);
-    }
-
-    private void Start ()
-    {
-        SetResolution ();
-
-        Invoke ("RotateEnable", 1.0f);
-    }
-
-    private void RotateEnable ()
-    {
-        Screen.autorotateToLandscapeLeft = true;
-        Screen.autorotateToLandscapeRight = true;
-        Screen.autorotateToPortrait = true;
-        Screen.autorotateToPortraitUpsideDown = true;
-    }
-
-    public void UpdateMe ()
-    {
-        if (GameProcessor.proggress != Proggress.TITLE)
-        {
-            return;
-        }
-        Orientation newOrientation = GetOrientation ();
-        if (newOrientation != currentOrientation)
-        {
-            GameObject.FindWithTag ("GameSystem").SendMessage ("ChangedOrientation");
-            currentOrientation = newOrientation;
-            ChangeOrientation (newOrientation);
-            FixedResolution ();
-        }
-    }
-
-    private Orientation GetOrientation ()
-    {
-        if (Screen.currentResolution.width > Screen.currentResolution.height)
-        {
-            return Orientation.LANDSCAPE;
-        }
-        else
-        {
-            return Orientation.PORTRAIT;
-        }
-
+        ChangeOrientation (DataBase.GetSavedOrientation ());
     }
 
     private void ChangeOrientation (Orientation orientation)
     {
+        StartCoroutine (ChangeOrientaionCor (orientation));
+        DataBase.SaveOrientation (orientation);
+    }
+
+    private IEnumerator ChangeOrientaionCor (Orientation orientation)
+    {
+        yield return null;
         GameObject ui = GameObject.FindWithTag ("UI");
+        currentOrientation = orientation;
         switch (orientation)
         {
         case Orientation.LANDSCAPE:
             UI_Path = "UI/Landscape/";
             ui.transform.Find ("Landscape").gameObject.SetActive (true);
             ui.transform.Find ("Portrait").gameObject.SetActive (false);
+            Screen.orientation = ScreenOrientation.LandscapeLeft;
             break;
         case Orientation.PORTRAIT:
             UI_Path = "UI/Portrait/";
             ui.transform.Find ("Landscape").gameObject.SetActive (false);
             ui.transform.Find ("Portrait").gameObject.SetActive (true);
+            Screen.orientation = ScreenOrientation.Portrait;
+            break;
+        }
+        FixedResolution (orientation);
+        AutoRotate (orientation);
+    }
+
+    private void FixedResolution (Orientation orientation)
+    {
+        StartCoroutine (FixedResolutionCor (orientation));
+    }
+
+    private IEnumerator FixedResolutionCor (Orientation orientation)
+    {
+        yield return new WaitForSeconds (0.05f);
+        switch (orientation)
+        {
+        case Orientation.LANDSCAPE:
+            Screen.SetResolution (Resolution.screenHeight, Resolution.screenWidth, true);
+            break;
+        case Orientation.PORTRAIT:
+            Screen.SetResolution (Resolution.screenWidth, Resolution.screenHeight, true);
             break;
         }
     }
 
-    private void SetResolution ()
+    private void AutoRotate (Orientation orientation)
     {
-        float screenRate = 1;
-        switch (currentOrientation)
+        switch (orientation)
         {
         case Orientation.LANDSCAPE:
-            screenRate = 720f / Screen.currentResolution.height;
+            Screen.autorotateToLandscapeLeft = true;
+            Screen.autorotateToLandscapeRight = true;
+            Screen.autorotateToPortrait = false;
+            Screen.autorotateToPortraitUpsideDown = false;
             break;
         case Orientation.PORTRAIT:
-            screenRate = 720f / Screen.currentResolution.width;
+            Screen.autorotateToLandscapeLeft = false;
+            Screen.autorotateToLandscapeRight = false;
+            Screen.autorotateToPortrait = true;
+            Screen.autorotateToPortraitUpsideDown = false;
             break;
         }
-        if (screenRate > 1)
-        {
-            screenRate = 1;
-        }
-        screenWidth = (int)(Screen.width * screenRate);
-        screenHeight = (int)(Screen.height * screenRate);
-        Screen.SetResolution (screenWidth, screenHeight, true);
+        Screen.orientation = ScreenOrientation.AutoRotation;
     }
 
-    private void FixedResolution ()
+    private void FixedRotate ()
     {
-        switch (currentOrientation)
-        {
-        case Orientation.LANDSCAPE:
-            Screen.SetResolution (screenHeight, screenWidth, true);
-            break;
-        case Orientation.PORTRAIT:
-            Screen.SetResolution (screenWidth, screenHeight, true);
-            break;
-        }
+        Screen.autorotateToLandscapeLeft = false;
+        Screen.autorotateToLandscapeRight = false;
+        Screen.autorotateToPortrait = false;
+        Screen.autorotateToPortraitUpsideDown = false;
     }
 }

@@ -1,7 +1,22 @@
 fileFormatVersion: 2
 guid: ab0f8a4c0b75b4025a28c528b5045c77
 ScriptedImporter:
-  internalIDToNameTable: []
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: gameObject/Control2
+  - first:
+      4: 400000
+    second: gameObject/Control2/Transform
+  - first:
+      212: 21200000
+    second: gameObject/Control2/SpriteRenderer
+  - first:
+      213: 21300000
+    second: sprite
+  - first:
+      1001: 100100000
+    second: gameObject
   externalObjects: {}
   serializedVersion: 2
   userData: 
@@ -16,11 +31,11 @@ ScriptedImporter:
   customPivot: {x: 0, y: 0}
   generatePhysicsShape: 0
   preserveViewport: 0
-  advancedMode: 0
+  advancedMode: 1
   predefinedResolutionIndex: 2
   targetResolution: 720
   resolutionMultiplier: 1
-  stepDistance: 10
+  stepDistance: 1
   samplingStepDistance: 100
   maxCordDeviationEnabled: 0
   maxCordDeviation: 1
