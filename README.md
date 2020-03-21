@@ -19,3 +19,8 @@ Apache License 2.0
 
 ### ・DoTween
 [アセットストアページ](https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676)
+
+## 使用したフリー素材サイト
+
+### [・Senses Circuit Free BGM & Sound Effects](https://www.senses-circuit.com/)
+### [・On-Jin 〜音人〜](https://on-jin.com/)
